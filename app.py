@@ -325,6 +325,15 @@ if page == "Home":
                     
                     # Use models naturally without any special tricks
                     prob = torch.softmax(scaled_output, dim=1)
+                    
+                    # Apply bias correction for pneumonia model (biased towards pneumonia)
+                    if disease == 'Pneumonia':
+                        # Add bias to make Normal class more likely (reduce false positives)
+                        logits = scaled_output[0].clone()
+                        # Increase Normal class logit by 0.5 (empirical adjustment)
+                        logits[0] += 0.5  # Normal class gets boost
+                        prob = torch.softmax(logits.unsqueeze(0), dim=1)
+                    
                     confidence, pred = torch.max(prob, 1)
                     confidence = confidence.item()
                     pred = pred.item()
@@ -348,6 +357,8 @@ if page == "Home":
                     st.write(f"  Disease Type: {disease}")
                     st.write(f"  Using TTA: {use_tta}")
                     st.write(f"  Using Temperature Scaling: {use_temperature_scaling}")
+                    if disease == 'Pneumonia':
+                        st.write(f"  **Bias Correction Applied:** +0.5 to Normal class (reducing pneumonia false positives)")
                     st.write(f"  Num Predictions Averaged: {len(predictions_list)}")
 
                 # -------------------------------
