@@ -174,7 +174,7 @@ def load_model(path, num_classes):
 def get_info(disease):
     if disease == "Pneumonia":
         # Original order
-        return "models/best_pneumonia.pth", ["Normal", "Pneumonia"]
+        return "models/best_model_pneumonia1.pth", ["Normal", "Pneumonia"]
     elif disease == "Brain Tumor":
         return "models/bestbrain_model.pth", ["No Tumor", "Tumor"]
     elif disease == "Breast Cancer":
