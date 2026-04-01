@@ -20,6 +20,7 @@ coverage.xml
 .mypy_cache
 .pytest_cache
 .hypothesis
+inspect_tb_model.py
 
 # Virtual environments
 .env
