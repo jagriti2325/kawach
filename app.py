@@ -182,7 +182,7 @@ def get_info(disease):
     elif disease == "Malaria":
         return "models/best_malaria.pth", ["Parasitized", "Uninfected"]
     elif disease == "Tuberculosis":
-        return "models/best_TB_model.pth", ["Normal", "TB"]
+        return "models/tb_model.pth", ["TB", "Normal"]
 
 # -------------------------------
 # TRANSFORM (MATCH TRAINING)
@@ -231,6 +231,14 @@ if page == "Home":
 
     disease = st.selectbox("Select Disease", ["Pneumonia", "Brain Tumor", "Breast Cancer", "Malaria", "Tuberculosis"])
     path, classes = get_info(disease)
+
+    # Allow TB label order adjustment for models trained with swapped class indices.
+    tb_flip = False
+    if disease == "Tuberculosis":
+        tb_flip = st.sidebar.checkbox("Flip TB class labels (Normal <-> TB)", value=False)
+        if tb_flip:
+            classes = classes[::-1]
+
     num_classes = len(classes)
     model = load_model(path, num_classes)
     transform = default_transform
@@ -276,9 +284,9 @@ if page == "Home":
                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
                 ])
                 
-                # Use TTA only for non-chest diseases (TB/Pneumonia models are more sensitive)
-                use_tta = disease not in ['Tuberculosis', 'Pneumonia']
-                use_temperature_scaling = disease not in ['Tuberculosis', 'Pneumonia']
+                # Use TTA and temperature scaling consistently across all diseases.
+                use_tta = True
+                use_temperature_scaling = True
                 
                 # Collect predictions from multiple augmented versions
                 predictions_list = []
@@ -326,19 +334,13 @@ if page == "Home":
                     # Use models naturally without any special tricks
                     prob = torch.softmax(scaled_output, dim=1)
                     
-                    # Apply bias correction for pneumonia model (biased towards pneumonia)
-                    if disease == 'Pneumonia':
-                        # Add bias to make Normal class more likely (reduce false positives)
-                        logits = scaled_output[0].clone()
-                        # Increase Normal class logit by 0.5 (empirical adjustment)
-                        logits[0] += 0.5  # Normal class gets boost
-                        prob = torch.softmax(logits.unsqueeze(0), dim=1)
-                    
+                    # No manual bias correction; follow model outputs directly for all diseases.
                     confidence, pred = torch.max(prob, 1)
                     confidence = confidence.item()
                     pred = pred.item()
+                    result = classes[pred]
 
-                result = classes[pred]
+                # No TB-specific post-hoc bias adjustment. Use model's natural argmax behavior.
 
                 # Debug: Show raw model outputs
                 with st.expander("🔧 Debug Info"):
