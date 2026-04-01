@@ -58,16 +58,7 @@ The `Tuberculosis` option uses `models/tb_model.pth`. Class mapping is handled v
 - default: `["Normal", "TB"]`
 - if inverted, toggle `Flip TB class labels` in sidebar.
 
-## Results (Example)
 
-### Normal chest X-ray
-![Normal example](images/normal_xray.png)
-
-### TB chest X-ray
-![TB example](images/tb_xray.png)
-
-### Malaria, Pneumonia, Brain Tumor
-![Other examples](images/other_results.png)
 
 ## Contributing
 
