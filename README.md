@@ -51,13 +51,6 @@ streamlit run app.py
 3. Click Analyze and inspect prediction + Grad-CAM visualization.
 4. Download the generated medical report.
 
-## TB-specific note
-
-The `Tuberculosis` option uses `models/tb_model.pth`. Class mapping is handled via:
-
-- default: `["Normal", "TB"]`
-- if inverted, toggle `Flip TB class labels` in sidebar.
-
 
 
 ## Contributing
