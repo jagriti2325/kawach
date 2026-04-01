@@ -1,30 +1,53 @@
-# Kawach - AI Medical Disease Detection
+# 🧠 Kawach - AI Medical Disease Detection System
 
-## Overview
+Kawach is an AI-powered medical image analysis system that detects multiple diseases using Deep Learning and provides explainable predictions using Grad-CAM.
 
-Kawach is an AI-powered medical image diagnosis platform built with Streamlit and PyTorch. It supports detection of:
+🚀 Built with PyTorch & Streamlit
+🔍 Supports multiple diseases
+📊 Provides confidence scores + visual explanations
 
-- Pneumonia
-- Brain Tumor
-- Breast Cancer
-- Malaria
-- Tuberculosis
+---
 
-The app loads trained `.pth` models from `models/`, applies preprocessing and visualization (GradCAM), and displays class prediction confidence with a downloadable report.
+## 🚀 Features
 
-## Repository Structure
+* 🩺 Multi-disease detection:
 
-- `app.py` - Streamlit web app interface and inference pipeline.
-- `models/` - pre-trained model weights (PyTorch `.pth`).
-  - `best_model_pneumonia1.pth`
-  - `bestbrain_model.pth`
-  - `best_breast.pth`
-  - `best_malaria.pth`
-  - `tb_model.pth`
-- `inspect_tb_model.py` - helper script to inspect model state dict keys.
-- `README.md` - this file.
+  * Tuberculosis
+  * Pneumonia
+  * Brain Tumor
+  * Breast Cancer
+  * Malaria
+* 🔍 Explainable AI using Grad-CAM
+* 📊 Confidence score prediction
+* 🖥️ Interactive UI with Streamlit
+* 📄 Downloadable medical report
 
-## Installation
+---
+
+## 🛠️ Tech Stack
+
+* Python
+* PyTorch
+* Streamlit
+* OpenCV
+* NumPy
+* Grad-CAM
+
+---
+
+## 📁 Project Structure
+
+```
+Disease_detection/
+│── app.py
+│── README.md
+│── requirements.txt
+│── models/
+```
+
+---
+
+## ⚙️ Installation
 
 ```bash
 python -m venv venv
@@ -32,34 +55,49 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-If you don't have `requirements.txt`, run:
+---
 
-```bash
-pip install streamlit torch torchvision pillow numpy opencv-python pytorch-grad-cam
-```
-
-## Run the app
+## ▶️ Run the App
 
 ```bash
 streamlit run app.py
 ```
 
-## Usage
+---
 
-1. Choose disease from sidebar.
-2. Upload one or more images (`jpg`, `png`, `jpeg`).
-3. Click Analyze and inspect prediction + Grad-CAM visualization.
-4. Download the generated medical report.
+## 🧪 Usage
 
+1. Select disease type from sidebar
+2. Upload medical image (`jpg`, `png`, `jpeg`)
+3. Click **Analyze**
+4. View prediction + Grad-CAM visualization
+5. Download the generated report
 
+---
 
-## Contributing
+## 🧠 Model Details
 
-1. Fork the repository.
-2. Create a branch `feature/your-feature`.
-3. Make changes and commit.
-4. Open a Pull Request.
+* Built using Convolutional Neural Networks (CNN)
+* Trained on medical imaging datasets
+* Supports both binary and multi-class classification
 
-## License
+---
+
+## 📌 Future Improvements
+
+* 🌐 Deploy on cloud (Streamlit Cloud / AWS)
+* 📊 Add evaluation metrics (accuracy, precision, recall)
+* 🧬 Expand to more diseases
+* 📱 Improve UI/UX for better usability
+
+---
+
+## 👩‍💻 Author
+
+**Jagriti Arora**
+
+---
+
+## 📜 License
 
 MIT License
