@@ -1,11 +1,4 @@
 import streamlit as st
-
-# ✅ MUST be first
-st.set_page_config(
-    page_title="Disease Detection App",
-    layout="wide"
-)
-
 # ✅ Debug (to confirm app starts)
 st.write("✅ App started successfully")
 
