@@ -1,10 +1,13 @@
 import streamlit as st
 
-# ✅ MUST be the FIRST Streamlit command
+# ✅ MUST be first
 st.set_page_config(
     page_title="Disease Detection App",
     layout="wide"
 )
+
+# ✅ Debug (to confirm app starts)
+st.write("✅ App started successfully")
 
 import torch
 import torch.nn as nn
@@ -13,13 +16,14 @@ import gdown
 import os
 
 # ------------------- DEVICE SETUP -------------------
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")  # 🔥 FORCE CPU (important for Render)
 
 # ------------------- DOWNLOAD FUNCTION -------------------
 def download_model(file_id, output):
     if not os.path.exists(output):
         url = f"https://drive.google.com/uc?id={file_id}"
-        gdown.download(url, output, quiet=False)
+        with st.spinner(f"Downloading {output}..."):
+            gdown.download(url, output, quiet=False)
 
 # ------------------- LOAD MODEL FUNCTION -------------------
 @st.cache_resource(show_spinner=False)
@@ -33,65 +37,74 @@ def load_model(path, num_classes, disease_type):
         "tb_final_generalized_model.pth": "1gW-_JZsHvQm25snAypUgHDdaOuhgEYGZ"
     }
 
-    # Download model if not exists
+    # ✅ Safe download
     download_model(FILE_IDS[path], path)
 
-    # Load weights
-    state_dict = torch.load(path, map_location=device)
+    # ✅ Safe load
+    try:
+        state_dict = torch.load(path, map_location=device)
+    except Exception as e:
+        st.error(f"Error loading model file: {e}")
+        return None
 
     # ------------------- MODEL SELECTION -------------------
-    if disease_type == "Tuberculosis":
-        model = models.densenet201(weights=None)
-        model.classifier = nn.Sequential(
-            nn.Linear(1920, 512),
-            nn.ReLU(),
-            nn.Dropout(0.3),
-            nn.Linear(512, num_classes)
-        )
+    try:
+        if disease_type == "Tuberculosis":
+            model = models.densenet201(weights=None)
+            model.classifier = nn.Sequential(
+                nn.Linear(1920, 512),
+                nn.ReLU(),
+                nn.Dropout(0.3),
+                nn.Linear(512, num_classes)
+            )
 
-    elif disease_type == "Pneumonia":
-        model = models.densenet121(weights=None)
-        num_ftrs = model.classifier.in_features
-        model.classifier = nn.Sequential(
-            nn.Linear(num_ftrs, 256),
-            nn.ReLU(),
-            nn.BatchNorm1d(256),
-            nn.Dropout(0.4),
-            nn.Linear(256, num_classes)
-        )
+        elif disease_type == "Pneumonia":
+            model = models.densenet121(weights=None)
+            num_ftrs = model.classifier.in_features
+            model.classifier = nn.Sequential(
+                nn.Linear(num_ftrs, 256),
+                nn.ReLU(),
+                nn.BatchNorm1d(256),
+                nn.Dropout(0.4),
+                nn.Linear(256, num_classes)
+            )
 
-    elif any(k.startswith('_') or 'efficientnet' in k.lower() for k in state_dict.keys()):
-        model = models.efficientnet_b0(weights=None)
-        model.classifier = nn.Sequential(
-            nn.Linear(1280, 512),
-            nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(512, num_classes)
-        )
+        elif any(k.startswith('_') or 'efficientnet' in k.lower() for k in state_dict.keys()):
+            model = models.efficientnet_b0(weights=None)
+            model.classifier = nn.Sequential(
+                nn.Linear(1280, 512),
+                nn.ReLU(),
+                nn.Dropout(0.5),
+                nn.Linear(512, num_classes)
+            )
 
-    elif 'layer1.0.conv3.weight' in state_dict:
-        model = models.resnet50(weights=None)
-        model.fc = nn.Sequential(
-            nn.Linear(2048, 256),
-            nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(256, num_classes)
-        )
+        elif 'layer1.0.conv3.weight' in state_dict:
+            model = models.resnet50(weights=None)
+            model.fc = nn.Sequential(
+                nn.Linear(2048, 256),
+                nn.ReLU(),
+                nn.Dropout(0.5),
+                nn.Linear(256, num_classes)
+            )
 
-    else:
-        model = models.resnet18(weights=None)
-        model.fc = nn.Sequential(
-            nn.Linear(512, 256),
-            nn.ReLU(),
-            nn.Linear(256, num_classes)
-        )
+        else:
+            model = models.resnet18(weights=None)
+            model.fc = nn.Sequential(
+                nn.Linear(512, 256),
+                nn.ReLU(),
+                nn.Linear(256, num_classes)
+            )
 
-    # Load state dict
-    model.load_state_dict(state_dict)
-    model.to(device)
-    model.eval()
+        model.load_state_dict(state_dict)
+        model.to(device)
+        model.eval()
 
-    return model
+        return model
+
+    except Exception as e:
+        st.error(f"Model creation error: {e}")
+        return None
+
 
 # ------------------- GET INFO FUNCTION -------------------
 def get_info(disease):
@@ -106,6 +119,7 @@ def get_info(disease):
     elif disease == "Tuberculosis":
         return "tb_final_generalized_model.pth", ["Normal", "TB"]
 
+
 # ------------------- UI -------------------
 st.title("🚀 Disease Detection App")
 
@@ -115,11 +129,17 @@ disease = st.selectbox(
 )
 
 if st.button("Load Model"):
-    st.write("Loading model...")
+    st.write("🔄 Loading model...")
 
     path, classes = get_info(disease)
 
-    with st.spinner("Downloading & loading model..."):
+    try:
         model = load_model(path, len(classes), disease)
 
-    st.success("Model loaded ✅")
+        if model is not None:
+            st.success("✅ Model loaded successfully")
+        else:
+            st.error("❌ Model failed to load")
+
+    except Exception as e:
+        st.error(f"Unexpected error: {e}")
