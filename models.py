@@ -1,7 +1,4 @@
 import streamlit as st
-# ✅ Debug (to confirm app starts)
-st.write("✅ App started successfully")
-
 import torch
 import torch.nn as nn
 import torchvision.models as models
@@ -9,19 +6,19 @@ import gdown
 import os
 
 # ------------------- DEVICE SETUP -------------------
-device = torch.device("cpu")  # 🔥 FORCE CPU (important for Render)
+device = torch.device("cpu") 
 
 # ------------------- DOWNLOAD FUNCTION -------------------
+@st.cache_resource(show_spinner=False)
 def download_model(file_id, output):
     if not os.path.exists(output):
         url = f"https://drive.google.com/uc?id={file_id}"
-        with st.spinner(f"Downloading {output}..."):
-            gdown.download(url, output, quiet=False)
+        gdown.download(url, output, quiet=False)
+    return True
 
 # ------------------- LOAD MODEL FUNCTION -------------------
 @st.cache_resource(show_spinner=False)
 def load_model(path, num_classes, disease_type):
-
     FILE_IDS = {
         "best_breast.pth": "1m4qUmlR2ZsCLKsHwxAvUv3QYN-yafDfs",
         "bestbrain_model.pth": "1xOy8OFwcoZnVadUkp1e5aKPTKeOEtKqb",
@@ -30,17 +27,14 @@ def load_model(path, num_classes, disease_type):
         "tb_final_generalized_model.pth": "1gW-_JZsHvQm25snAypUgHDdaOuhgEYGZ"
     }
 
-    # ✅ Safe download
+    # Safe download
     download_model(FILE_IDS[path], path)
 
-    # ✅ Safe load
     try:
         state_dict = torch.load(path, map_location=device)
     except Exception as e:
-        st.error(f"Error loading model file: {e}")
         return None
 
-    # ------------------- MODEL SELECTION -------------------
     try:
         if disease_type == "Tuberculosis":
             model = models.densenet201(weights=None)
@@ -50,7 +44,6 @@ def load_model(path, num_classes, disease_type):
                 nn.Dropout(0.3),
                 nn.Linear(512, num_classes)
             )
-
         elif disease_type == "Pneumonia":
             model = models.densenet121(weights=None)
             num_ftrs = model.classifier.in_features
@@ -61,16 +54,6 @@ def load_model(path, num_classes, disease_type):
                 nn.Dropout(0.4),
                 nn.Linear(256, num_classes)
             )
-
-        elif any(k.startswith('_') or 'efficientnet' in k.lower() for k in state_dict.keys()):
-            model = models.efficientnet_b0(weights=None)
-            model.classifier = nn.Sequential(
-                nn.Linear(1280, 512),
-                nn.ReLU(),
-                nn.Dropout(0.5),
-                nn.Linear(512, num_classes)
-            )
-
         elif 'layer1.0.conv3.weight' in state_dict:
             model = models.resnet50(weights=None)
             model.fc = nn.Sequential(
@@ -79,7 +62,6 @@ def load_model(path, num_classes, disease_type):
                 nn.Dropout(0.5),
                 nn.Linear(256, num_classes)
             )
-
         else:
             model = models.resnet18(weights=None)
             model.fc = nn.Sequential(
@@ -91,48 +73,16 @@ def load_model(path, num_classes, disease_type):
         model.load_state_dict(state_dict)
         model.to(device)
         model.eval()
-
         return model
-
     except Exception as e:
-        st.error(f"Model creation error: {e}")
         return None
 
-
-# ------------------- GET INFO FUNCTION -------------------
 def get_info(disease):
-    if disease == "Pneumonia":
-        return "nimobest_model.pth", ["Normal", "Pneumonia"]
-    elif disease == "Brain Tumor":
-        return "bestbrain_model.pth", ["No Tumor", "Tumor"]
-    elif disease == "Breast Cancer":
-        return "best_breast.pth", ["benign", "malignant"]
-    elif disease == "Malaria":
-        return "best_malaria.pth", ["Parasitized", "Uninfected"]
-    elif disease == "Tuberculosis":
-        return "tb_final_generalized_model.pth", ["Normal", "TB"]
-
-
-# ------------------- UI -------------------
-st.title("🚀 Disease Detection App")
-
-disease = st.selectbox(
-    "Select Disease",
-    ["Pneumonia", "Brain Tumor", "Breast Cancer", "Malaria", "Tuberculosis"]
-)
-
-if st.button("Load Model"):
-    st.write("🔄 Loading model...")
-
-    path, classes = get_info(disease)
-
-    try:
-        model = load_model(path, len(classes), disease)
-
-        if model is not None:
-            st.success("✅ Model loaded successfully")
-        else:
-            st.error("❌ Model failed to load")
-
-    except Exception as e:
-        st.error(f"Unexpected error: {e}")
+    mapping = {
+        "Pneumonia": ("nimobest_model.pth", ["Normal", "Pneumonia"]),
+        "Brain Tumor": ("bestbrain_model.pth", ["No Tumor", "Tumor"]),
+        "Breast Cancer": ("best_breast.pth", ["benign", "malignant"]),
+        "Malaria": ("best_malaria.pth", ["Parasitized", "Uninfected"]),
+        "Tuberculosis": ("tb_final_generalized_model.pth", ["Normal", "TB"])
+    }
+    return mapping.get(disease)
