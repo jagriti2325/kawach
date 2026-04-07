@@ -28,7 +28,7 @@ def show_home_page():
             image = Image.open(file).convert("RGB")
             col1, col2 = st.columns(2)
             with col1:
-                st.image(image, caption=file.name, use_container_width=True)
+                st.image(image, caption=file.name, width=500)
 
             if st.button(f"🔍 Analyze {file.name}", key=f"btn_{file.name}"):
                 img_tensor = default_transform(image).unsqueeze(0).to(device)
