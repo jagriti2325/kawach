@@ -66,13 +66,12 @@ def load_model(path, num_classes, disease_type):
 
 def get_info(disease):
     if disease == "Pneumonia":
-        # Updated to your new best model path
-        return r"D:\Disease_detection\models\nimobest_model (1).pth", ["Normal", "Pneumonia"]
+        return r"D:\disease_final\models\nimobest_model (1).pth", ["Normal", "Pneumonia"]
     elif disease == "Brain Tumor":
-        return "models/bestbrain_model.pth", ["No Tumor", "Tumor"]
+        return r"D:\disease_final\models\bestbrain_model.pth", ["No Tumor", "Tumor"]
     elif disease == "Breast Cancer":
-        return "models/best_breast.pth", ["benign", "malignant"]
+        return r"D:\disease_final\models\best_breast.pth", ["benign", "malignant"]
     elif disease == "Malaria":
-        return "models/best_malaria.pth", ["Parasitized", "Uninfected"]
+        return r"D:\disease_final\models\best_malaria.pth", ["Parasitized", "Uninfected"]
     elif disease == "Tuberculosis":
-        return r"D:\Disease_detection\models\tb_final_generalized_model.pth", ["Normal", "TB"]
+        return r"D:\disease_final\models\tb_final_generalized_model.pth", ["Normal", "TB"]

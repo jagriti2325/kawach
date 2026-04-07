@@ -90,32 +90,34 @@ def show_home_page():
                     st.markdown("""
                     <style>
                     .result-card {
-                        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
                         border-radius: 16px;
                         padding: 24px;
-                        border: 2px solid #e2e8f0;
+                        border: 2px solid #38bdf8;
                         margin-bottom: 20px;
                     }
                     .prediction-title {
-                        font-size: 1.4rem;
-                        font-weight: 700;
-                        color: #0f172a;
+                        font-size: 1.5rem;
+                        font-weight: 900;
+                        color: #38bdf8;
                         margin-bottom: 16px;
                     }
                     .prediction-value {
                         font-size: 1.3rem;
                         font-weight: 600;
-                        color: #1e293b;
+                        color: #e2e8f0;
                         margin: 12px 0;
                     }
                     .confidence-badge {
-                        background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
-                        border: 2px solid #0ea5e9;
+                        background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
+                        border: 2px solid #38bdf8;
                         border-radius: 12px;
                         padding: 12px 16px;
-                        font-weight: 600;
-                        color: #0c4a6e;
+                        font-weight: 700;
+                        color: #0f172a;
                         margin: 12px 0;
+                        font-size: 1.1rem;
+                        display: inline-block;
                     }
                     </style>
                     <div class='result-card'>
@@ -135,77 +137,87 @@ def show_home_page():
                     if disease_detected:
                         st.warning("🔴 **Red areas indicate regions of concern**")
 
+                # Build the report HTML with proper variable interpolation
                 st.markdown("""
                 <style>
                 .report-card {
-                    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+                    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
                     border-radius: 16px;
                     padding: 28px;
-                    border: 2px solid #e2e8f0;
+                    border: 2px solid #38bdf8;
                     margin-bottom: 24px;
+                    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.15);
                 }
                 .report-title {
-                    font-size: 1.5rem;
-                    font-weight: 700;
-                    color: #0f172a;
+                    font-size: 1.6rem;
+                    font-weight: 900;
+                    color: #38bdf8;
                     margin-bottom: 20px;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
+                    border-bottom: 3px solid #38bdf8;
+                    padding-bottom: 12px;
                 }
                 .report-section {
-                    margin-bottom: 20px;
+                    margin-bottom: 24px;
                 }
                 .section-header {
-                    font-size: 1.1rem;
-                    font-weight: 700;
-                    color: #1e293b;
+                    font-size: 1.15rem;
+                    font-weight: 800;
+                    color: #06b6d4;
                     margin-bottom: 12px;
-                    padding-bottom: 8px;
-                    border-bottom: 2px solid #e2e8f0;
+                    padding-bottom: 10px;
+                    border-bottom: 2px solid #0ea5e9;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
                 }
                 .report-item {
-                    color: #475569;
+                    color: #e2e8f0;
                     margin-bottom: 10px;
-                    padding: 8px 0;
-                    line-height: 1.6;
+                    padding: 10px 12px;
+                    line-height: 1.7;
+                    background: rgba(15, 23, 42, 0.5);
+                    border-left: 3px solid #0ea5e9;
+                    border-radius: 4px;
                 }
                 .status-badge {
                     display: inline-block;
-                    background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
-                    border: 2px solid #0ea5e9;
+                    background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
+                    border: 2px solid #38bdf8;
                     border-radius: 12px;
-                    padding: 8px 16px;
-                    font-weight: 600;
-                    color: #0c4a6e;
-                    margin-bottom: 16px;
+                    padding: 12px 24px;
+                    font-weight: 700;
+                    color: #0f172a;
+                    margin-bottom: 20px;
+                    font-size: 1.05rem;
+                    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
                 }
                 </style>
                 <div class='report-card'>
                     <div class='report-title'>📄 Medical Diagnostic Report</div>
-                    <div class='status-badge'>Status: {report['status']}</div>
-                    
-                    <div class='report-section'>
-                        <div class='section-header'>🔍 Finding</div>
-                        <div class='report-item'>{report['finding']}</div>
-                    </div>
-                    
-                    <div class='report-section'>
-                        <div class='section-header'>📋 Description</div>
-                        <div class='report-item'>{report['description']}</div>
-                    </div>
-                    
-                    <div class='report-section'>
-                        <div class='section-header'>⚠️ Key Symptoms</div>
-                        {"".join([f"<div class='report-item'>• {symptom}</div>" for symptom in report['key_symptoms']])}
-                    </div>
-                    
-                    <div class='report-section'>
-                        <div class='section-header'>💊 Recommendations</div>
-                        {"".join([f"<div class='report-item'>• {rec}</div>" for rec in report['recommendations']])}
-                    </div>
                 </div>
                 """, unsafe_allow_html=True)
+                
+                # Status badge
+                st.markdown(f"<div style='display: inline-block; background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%); border: 2px solid #38bdf8; border-radius: 12px; padding: 12px 24px; font-weight: 700; color: #0f172a; font-size: 1.05rem;'>✓ Status: {report['status']}</div>", unsafe_allow_html=True)
+                
+                st.markdown("")
+                
+                # Finding
+                st.markdown("<div class='section-header'>🔍 Finding</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='report-item'>{report['finding']}</div>", unsafe_allow_html=True)
+                
+                # Description
+                st.markdown("<div class='section-header'>📋 Description</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='report-item'>{report['description']}</div>", unsafe_allow_html=True)
+                
+                # Key Symptoms
+                st.markdown("<div class='section-header'>⚠️ Key Symptoms</div>", unsafe_allow_html=True)
+                for symptom in report['key_symptoms']:
+                    st.markdown(f"<div class='report-item'>• {symptom}</div>", unsafe_allow_html=True)
+                
+                # Recommendations
+                st.markdown("<div class='section-header'>💊 Recommendations</div>", unsafe_allow_html=True)
+                for rec in report['recommendations']:
+                    st.markdown(f"<div class='report-item'>• {rec}</div>", unsafe_allow_html=True)
                 
                 st.markdown("**Class Probabilities:**")
                 st.table(report['probabilities'])
