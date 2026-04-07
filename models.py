@@ -3,16 +3,37 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 from config import device
+import gdown
+import os
+
+# ✅ Download function
+def download_model(file_id, output):
+    if not os.path.exists(output):
+        url = f"https://drive.google.com/uc?id={file_id}"
+        gdown.download(url, output, quiet=False)
+
 
 @st.cache_resource
 def load_model(path, num_classes, disease_type):
-    # Load the state dict first to map to CPU/GPU
+
+    # ✅ FILE ID mapping
+    FILE_IDS = {
+        "best_breast.pth": "1m4qUmlR2ZsCLKsHwxAvUv3QYN-yafDfs",
+        "bestbrain_model.pth": "1xOy8OFwcoZnVadUkp1e5aKPTKeOEtKqb",
+        "best_malaria.pth": "1_KeqAG8T3ZAVnVEca834hZr8DXau3WlS",
+        "nimobest_model.pth": "1M9yZEJe6QwCxhhh2kLj483J7A5pX314k",
+        "tb_final_generalized_model.pth": "1gW-_JZsHvQm25snAypUgHDdaOuhgEYGZ"
+    }
+
+    # ✅ Download model first
+    download_model(FILE_IDS[path], path)
+
+    # ✅ Load state dict AFTER download
     state_dict = torch.load(path, map_location=device)
 
-    # 1. Handle Tuberculosis (DenseNet-201)
+    # 1. Tuberculosis (DenseNet-201)
     if disease_type == "Tuberculosis":
         model = models.densenet201(weights=None)
-        # Based on your error log, the TB model expects 1920 -> 512
         model.classifier = nn.Sequential(
             nn.Linear(1920, 512),
             nn.ReLU(),
@@ -20,10 +41,10 @@ def load_model(path, num_classes, disease_type):
             nn.Linear(512, num_classes)
         )
 
-    # 2. Handle Pneumonia (DenseNet-121)
+    # 2. Pneumonia (DenseNet-121)
     elif disease_type == "Pneumonia":
         model = models.densenet121(weights=None)
-        num_ftrs = model.classifier.in_features # This will be 1024
+        num_ftrs = model.classifier.in_features
         model.classifier = nn.Sequential(
             nn.Linear(num_ftrs, 256),
             nn.ReLU(),
@@ -32,7 +53,7 @@ def load_model(path, num_classes, disease_type):
             nn.Linear(256, num_classes)
         )
 
-    # 3. Handle Other Architectures (EfficientNet/ResNet)
+    # 3. EfficientNet
     elif any(k.startswith('_') or 'efficientnet' in path.lower() for k in state_dict.keys()):
         model = models.efficientnet_b0()
         model.classifier = nn.Sequential(
@@ -41,6 +62,8 @@ def load_model(path, num_classes, disease_type):
             nn.Dropout(0.5),
             nn.Linear(512, num_classes)
         )
+
+    # 4. ResNet50
     elif 'layer1.0.conv3.weight' in state_dict:
         model = models.resnet50()
         model.fc = nn.Sequential(
@@ -49,29 +72,33 @@ def load_model(path, num_classes, disease_type):
             nn.Dropout(0.5),
             nn.Linear(256, num_classes)
         )
+
+    # 5. Default (ResNet18)
     else:
-        # Default fallback (ResNet-18)
         model = models.resnet18()
         model.fc = nn.Sequential(
             nn.Linear(512, 256),
-            # ... rest of your resnet18 logic
+            nn.ReLU(),
             nn.Linear(256, num_classes)
         )
 
-    # Load weights into the correctly initialized architecture
+    # ✅ Load weights
     model.load_state_dict(state_dict)
     model.to(device)
     model.eval()
+
     return model
 
+
+# ✅ FIXED get_info (NO local paths anymore)
 def get_info(disease):
     if disease == "Pneumonia":
-        return r"D:\disease_final\models\nimobest_model (1).pth", ["Normal", "Pneumonia"]
+        return "nimobest_model.pth", ["Normal", "Pneumonia"]
     elif disease == "Brain Tumor":
-        return r"D:\disease_final\models\bestbrain_model.pth", ["No Tumor", "Tumor"]
+        return "bestbrain_model.pth", ["No Tumor", "Tumor"]
     elif disease == "Breast Cancer":
-        return r"D:\disease_final\models\best_breast.pth", ["benign", "malignant"]
+        return "best_breast.pth", ["benign", "malignant"]
     elif disease == "Malaria":
-        return r"D:\disease_final\models\best_malaria.pth", ["Parasitized", "Uninfected"]
+        return "best_malaria.pth", ["Parasitized", "Uninfected"]
     elif disease == "Tuberculosis":
-        return r"D:\disease_final\models\tb_final_generalized_model.pth", ["Normal", "TB"]
+        return "tb_final_generalized_model.pth", ["Normal", "TB"]
