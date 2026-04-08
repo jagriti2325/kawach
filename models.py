@@ -2,37 +2,20 @@ import streamlit as st
 import torch
 import torch.nn as nn
 import torchvision.models as models
-import gdown
 import os
 
 # ------------------- DEVICE SETUP -------------------
-device = torch.device("cpu") 
-
-# ------------------- DOWNLOAD FUNCTION -------------------
-@st.cache_resource(show_spinner=False)
-def download_model(file_id, output):
-    if not os.path.exists(output):
-        url = f"https://drive.google.com/uc?id={file_id}"
-        gdown.download(url, output, quiet=False)
-    return True
+# Hugging Face Spaces (Free Tier) uses CPU
+device = torch.device("cpu")
 
 # ------------------- LOAD MODEL FUNCTION -------------------
 @st.cache_resource(show_spinner=False)
 def load_model(path, num_classes, disease_type):
-    FILE_IDS = {
-        "best_breast.pth": "1m4qUmlR2ZsCLKsHwxAvUv3QYN-yafDfs",
-        "bestbrain_model.pth": "1xOy8OFwcoZnVadUkp1e5aKPTKeOEtKqb",
-        "best_malaria.pth": "1_KeqAG8T3ZAVnVEca834hZr8DXau3WlS",
-        "nimobest_model.pth": "1M9yZEJe6QwCxhhh2kLj483J7A5pX314k",
-        "tb_final_generalized_model.pth": "1gW-_JZsHvQm25snAypUgHDdaOuhgEYGZ"
-    }
-
-    # Safe download
-    download_model(FILE_IDS[path], path)
-
     try:
+        # Load directly from the uploaded 'models/' folder
         state_dict = torch.load(path, map_location=device)
     except Exception as e:
+        st.error(f"Error loading {path}: {e}")
         return None
 
     try:
@@ -75,14 +58,17 @@ def load_model(path, num_classes, disease_type):
         model.eval()
         return model
     except Exception as e:
+        st.error(f"Architecture mismatch for {disease_type}: {e}")
         return None
 
 def get_info(disease):
+    # These paths must match the filenames in your 'models' folder on Hugging Face exactly.
+    # Note: Using the exact filenames from your local machine paths provided.
     mapping = {
-        "Pneumonia": ("nimobest_model.pth", ["Normal", "Pneumonia"]),
-        "Brain Tumor": ("bestbrain_model.pth", ["No Tumor", "Tumor"]),
-        "Breast Cancer": ("best_breast.pth", ["benign", "malignant"]),
-        "Malaria": ("best_malaria.pth", ["Parasitized", "Uninfected"]),
-        "Tuberculosis": ("tb_final_generalized_model.pth", ["Normal", "TB"])
+        "Pneumonia": ("models/nimobest_model (1).pth", ["Normal", "Pneumonia"]),
+        "Brain Tumor": ("models/bestbrain_model.pth", ["No Tumor", "Tumor"]),
+        "Breast Cancer": ("models/best_breast.pth", ["benign", "malignant"]),
+        "Malaria": ("models/best_malaria.pth", ["Parasitized", "Uninfected"]),
+        "Tuberculosis": ("models/tb_final_generalized_model.pth", ["Normal", "TB"])
     }
     return mapping.get(disease)
