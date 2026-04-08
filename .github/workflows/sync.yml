@@ -16,4 +16,5 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git remote add hf https://jagriti2325:$HF_TOKEN@huggingface.co/spaces/JagritiArora/Kawach-Diagnostic-Final
+          # This forces the code sync while ignoring the fact that Hugging Face has models you don't have on GitHub
           git push --force hf main
