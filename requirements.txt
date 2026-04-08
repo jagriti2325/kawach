@@ -4,7 +4,7 @@ pandas
 scikit-learn
 pillow
 opencv-python-headless
-torch>=2.5.1+cpu
-torchvision>=0.20.1+cpu
+torch==2.5.1+cpu
+torchvision==0.20.1+cpu
 grad-cam
 gdown
