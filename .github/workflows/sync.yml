@@ -1,28 +1,36 @@
-- name: Push to hub
+name: Sync to Hugging Face hub
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 1. Delete the models so they aren't in the new push
+          # 1. Clean out the heavy files from the temporary runner
           rm -rf models
+          rm -f "nimobest_model (1).pth"
           rm -f "nimobest_model.pth"
           
-          # 2. Initialize a fresh, temporary git repo inside the runner
-          # This wipes the 'memory' of the large files
-          cd ..
-          mkdir temporary_sync
-          cp -rp Kawach-Diagnostic-Final/. temporary_sync/
-          cd temporary_sync
-          rm -rf .git
-          rm -rf models
-          rm -f "nimobest_model.pth"
-          
-          git init
+          # 2. Setup git identity for the temporary commit
           git config --global user.email "sync@example.com"
           git config --global user.name "Sync Bot"
-          git checkout -b main
-          git add .
-          git commit -m "Fresh sync without models"
           
-          # 3. Force push this 'clean' version to Hugging Face
+          # 3. Create a clean branch without large file history
+          git checkout --orphan latest_branch
+          git add -A
+          git commit -m "Clean sync: code only"
+          git branch -D main
+          git branch -m main
+          
+          # 4. Force push to Hugging Face
           git remote add hf https://jagriti2325:$HF_TOKEN@huggingface.co/spaces/JagritiArora/Kawach-Diagnostic-Final
           git push --force hf main
