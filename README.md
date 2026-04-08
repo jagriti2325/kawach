@@ -1,10 +1,11 @@
 ---
 title: Kawach Diagnostic Final
 emoji: 🛡️
-colorFrom: red
-colorTo: red
+colorFrom: blue
+colorTo: indigo
 sdk: streamlit
-app_file: src/streamlit_app.py
+sdk_version: 1.31.0
+app_file: app.py
 pinned: false
 ---
 # 🧠 AI Diagnostic Hub - Medical Disease Detection System
