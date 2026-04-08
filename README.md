@@ -4,7 +4,7 @@ emoji: 🛡️
 colorFrom: red
 colorTo: red
 sdk: streamlit
-app_file: app.py
+app_file: src/streamlit_app.py
 pinned: false
 ---
 # 🧠 AI Diagnostic Hub - Medical Disease Detection System
