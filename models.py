@@ -5,7 +5,6 @@ import torchvision.models as models
 import os
 
 # ------------------- DEVICE SETUP -------------------
-# Hugging Face Spaces (Free Tier) uses CPU
 device = torch.device("cpu")
 
 # ------------------- LOAD MODEL FUNCTION -------------------
@@ -58,12 +57,10 @@ def load_model(path, num_classes, disease_type):
         model.eval()
         return model
     except Exception as e:
-        st.error(f"Architecture mismatch for {disease_type}: {e}")
+        st.error(f"Architecture mismatch: {e}")
         return None
 
 def get_info(disease):
-    # These paths must match the filenames in your 'models' folder on Hugging Face exactly.
-    # Note: Using the exact filenames from your local machine paths provided.
     mapping = {
         "Pneumonia": ("models/nimobest_model (1).pth", ["Normal", "Pneumonia"]),
         "Brain Tumor": ("models/bestbrain_model.pth", ["No Tumor", "Tumor"]),
