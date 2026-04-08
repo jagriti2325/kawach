@@ -1,30 +1,28 @@
-name: Sync to Hugging Face hub
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  sync-to-hub:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Push to hub
+- name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 1. Temporarily remove the models folder ONLY in this runner
-          # This does NOT delete it from your GitHub website repo
+          # 1. Delete the models so they aren't in the new push
           rm -rf models
+          rm -f "nimobest_model.pth"
           
-          # 2. Tell git to "forget" the models for this one push
-          git config --global user.email "you@example.com"
-          git config --global user.name "GitHub Action"
+          # 2. Initialize a fresh, temporary git repo inside the runner
+          # This wipes the 'memory' of the large files
+          cd ..
+          mkdir temporary_sync
+          cp -rp Kawach-Diagnostic-Final/. temporary_sync/
+          cd temporary_sync
+          rm -rf .git
+          rm -rf models
+          rm -f "nimobest_model.pth"
+          
+          git init
+          git config --global user.email "sync@example.com"
+          git config --global user.name "Sync Bot"
+          git checkout -b main
           git add .
-          git commit -m "Internal sync: excluding large models" || echo "No changes"
+          git commit -m "Fresh sync without models"
           
-          # 3. Push the rest of the code (utils, app.py, pages)
+          # 3. Force push this 'clean' version to Hugging Face
           git remote add hf https://jagriti2325:$HF_TOKEN@huggingface.co/spaces/JagritiArora/Kawach-Diagnostic-Final
           git push --force hf main
