@@ -1,3 +1,12 @@
+---
+title: Kawach Diagnostic Final
+emoji: 🛡️
+colorFrom: red
+colorTo: red
+sdk: streamlit
+app_file: app.py
+pinned: false
+---
 # 🧠 AI Diagnostic Hub - Medical Disease Detection System
 
 AI Diagnostic Hub is an AI-powered medical image analysis system that detects multiple diseases using Deep Learning and provides explainable predictions using Grad-CAM.
