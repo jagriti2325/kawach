@@ -46,11 +46,19 @@ def load_model(path, num_classes, disease_type):
             )
         else:
             model = models.resnet18(weights=None)
-            model.fc = nn.Sequential(
-                nn.Linear(512, 256),
-                nn.ReLU(),
-                nn.Linear(256, num_classes)
-            )
+            if 'fc.3.weight' in state_dict or 'fc.3.bias' in state_dict:
+                model.fc = nn.Sequential(
+                    nn.Linear(512, 256),
+                    nn.ReLU(),
+                    nn.Dropout(0.5),
+                    nn.Linear(256, num_classes)
+                )
+            else:
+                model.fc = nn.Sequential(
+                    nn.Linear(512, 256),
+                    nn.ReLU(),
+                    nn.Linear(256, num_classes)
+                )
 
         model.load_state_dict(state_dict)
         model.to(device)
